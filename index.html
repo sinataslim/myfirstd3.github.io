@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>D3 Page Template</title>
+        <link rel="stylesheet" type="text/css" href="style.css"/>
+        <script type="text/javascript" src="d3.js"></script>        
+    </head>
+    <body>
+        <script type="text/javascript">
+            //var dataset=[]
+            //for (let index = 0; index < 25; index++) {
+            //    dataset.push(Math.random()*10);
+            //}
+            //d3.select("body").selectAll("p").data(dataset).enter()
+            //.append("p").text(function(d){return "I can count up to "+d+"."})
+            //.style("color", function(d){//style() applies css directly
+            //    if(d>15){
+            //        return "red";
+            //    } else{
+            //        return "blue";
+            //    }
+            //});
+
+            // using empty divs to create bar chart (not recommended) 
+            //d3.select("body").selectAll("div").data(dataset).enter()
+            //.append("div").attr("class","bar")
+            //.style("height", function(d){
+            //   return (d*5)+"px"
+            //});
+            
+            var w = 500;
+            var h = 100;
+
+            var dataset = [5,10,15,20,25];
+
+            //svg without declaring vars.
+            d3.select("body")
+            .append("svg")
+            .attr("width",w)
+            .attr("height",h)
+            .selectAll("circle")
+            .data(dataset)
+            .enter()
+            .append("circle")
+            .attr("cx", function(d,i){return (i*55)+30})
+            .attr("cy", h/2)
+            .attr("r", function(d){return d})
+            .attr("fill", "red")
+            .attr("opacity", function(d,i){return i*.2+.2})
+            
+            // an alternative way
+            //Firt add the svg canvas
+            var svg = d3.select("body")
+                    .append("svg")
+                    .attr("width",w)
+                    .attr("height",h+20);
+            // add circles within the canvas
+            var circles = svg.selectAll("circle")
+                            .data(dataset)
+                            .enter()
+                            .append("circle");
+            //add circle attributes
+            circles.attr("cx", function(d,i){return (i*50)+25})
+            .attr("cy", (h+20)/2)
+            .attr("r", function(d){return d})
+            //the formatted string should be wrapped in backtick `${}`
+            .attr("fill", function(d,i){return `rgba(0, 255, 0, ${1/i+1})`})
+            .attr("stroke", "rgba(128, 0, 128, .5)")
+            .attr("stroke-width", function(d,i){return i*3});
+            
+            // ---->>>>svg bar chart<<<<----
+            var dataset = [ 5, 10, 13, 19, 21, 25, 22, 18, 15, 13,
+            11, 12, 15, 20, 18, 17, 16, 18, 23, 25, 22, 40, 38, 33,
+            17, 21, 11, 10, 3, 19, 29, 32, 7, 14, 18];
+            var len=dataset.length
+            var pad=.5
+            //scale the data bw [0,1]
+            var s=function(x, data){
+                mn=Math.min.apply(Math.min, data)
+                mx=Math.max.apply(Math.max, data)
+                return  (x-mn)/(mx-mn)}
+            var svg=d3.select("body").append("svg").attr("width",w)
+            .attr("lenght",h);
+            svg.selectAll("rect").data(dataset)
+                .enter().append('rect')
+                // it's important to always consider the bar width as 
+                // a function of svg canvas width and number of data points
+                .attr('x', function(d, i) { return i*(w/len);})
+                .attr('y', function(d) { return h-d; })
+                .attr('width', (w/len)-pad)
+                .attr('height', function(d) { return d;})
+                .attr('rx', 1)
+                .attr('ry', 4)
+                .style('fill', function(d) { 
+                    return `rgba(0, 128, 128, ${s(d, dataset)+.2})`; });
+
+            
+            var svg=d3.select("body").append("svg").attr("width",w)
+            .attr("lenght",h);
+            svg.selectAll("rect").data(dataset)
+                .enter().append('rect')
+                // it's important to always consider the bar width as 
+                // a function of svg canvas width and number of data points
+                .attr('x', function(d, i) { return i*(w/len);})
+                .attr('y', function(d) { return h-(d*2); })
+                .attr('width', (w/len)-pad)
+                .attr('height', function(d) { return d*2;})
+                .attr('rx', 1)
+                .attr('ry', 4)
+                .style('fill', function(d) { 
+                    return `rgba(0, 0, ${Math.round(d*10)})`; })
+            svg.selectAll("text").data(dataset).enter().append("text")
+            .text(function(d) {return d;})
+            // use the bar coordinates with some modifications
+            .attr('x', function(d, i) { return i*(w/len)+(((w/len)-pad)/2);})
+            .attr('y', function(d) { return h-(d*2)+8; })
+            .attr("font-size", 8)
+            .attr('fill', "white")
+            // to set the text (numbers) to the middle of the bars
+            // first we need to set the middle of the text at the start point
+            // then set the text start point (x) to the middle of the bars
+            .attr('text-anchor', "middle" );//set the middle of the text at the start point
+
+            // --------scatter plot----------
+            w=500
+            h=200
+            var dataset = [[5, 20], [480, 90], [250, 50], [100, 33], 
+            [330, 95], [410, 12], [475, 44], [25, 67], [85, 21], [220, 88]];
+            
+            var ay=[];
+            for(i=0; i<dataset.length;i++){
+                ay.push(dataset[i][1])
+            }
+            rad=5
+
+            var svg=d3.select("body").append("svg").attr("width",w).attr("height",h)
+            var circles=svg.selectAll("circle").data(dataset).enter().append("circle")
+            circles
+                .attr('cx', function(d) { return d[0]; })
+                .attr('cy', function(d) { return h-d[1]; })
+                // the data values (hear y vales) should be presented as area not r
+                .attr('r', function(d) { return Math.sqrt(d[1]/Math.PI)*3; })
+                .attr('fill', function(d) { return `rgba(0,128,128,${s(d[1], ay)+.3})`; });
+            // text
+            svg.selectAll("text").data(dataset).enter().append("text")
+            .text(function(d) {return d[1];})
+            .attr('x', function(d) { return d[0]; })
+            .attr('y', function(d) { return h-d[1]; })
+            .attr("text-anchor","middle") // horizontally
+            .attr("dominant-baseline","middle") //vertically
+            .attr("font-size", 8)
+            .attr("fill","white")
+
+            // --------scatter plot with d3.scaleLinear------------
+            // let's use d3 scale func to dynamically scale the visualization
+            var dataset = [
+                [5, 20], [480, 90], [250, 50], [100, 33], [330, 95],
+                [410, 12], [475, 44], [25, 67], [85, 21], [220, 88],
+                [600, 150] ];
+            
+            // we need to make sure that the input domain is always 
+            // within our svg canvas range. there we need to scale our 
+            // input data
+            var xmn=d3.min(dataset, function(d) { return d[0]; })
+            var xmx=d3.max(dataset, function(d) { return d[0]; })
+            var ymn=d3.min(dataset, function(d) { return d[1]; })
+            var ymx=d3.max(dataset, function(d) { return d[1]; })
+            var pad = 30
+            var xscale=d3.scaleLinear().domain([xmn,xmx]).nice().range([pad,w-pad])
+            var yscale=d3.scaleLinear().domain([ymn,ymx]).nice().range([pad,h-pad])
+            // get the radius from area and scale r
+            var r=function(area){return Math.sqrt(area/Math.PI)}
+            var rmn=d3.min(dataset, function(d) { return r(d[1]); })
+            var rmx=d3.max(dataset, function(d) { return r(d[1]); })
+            var rscale=d3.scaleSqrt().domain([rmn,rmx]).nice()
+                        .rangeRound([2,5])
+                        
+            var svg=d3.select("body").append("svg").attr("width",w).attr("height",h)
+            var circles=svg.selectAll("circle").data(dataset).enter().append("circle")
+            circles
+                .attr('cx', function(d) { return xscale(d[0]); })
+                .attr('cy', function(d) { return h-yscale(d[1]); })
+                // the data values (hear y vales) should be presented as area not r
+                // we can scale them too to make sure first the minimum value is 
+                // noticable enough and th max value doe not get out og chart
+                .attr('r', function(d) { return rscale(d[1]); })
+                .attr('fill', function(d) { return `rgba(0,128,128,${s(d[1], ay)+.3})`; });
+            // text
+            svg.selectAll("text").data(dataset).enter().append("text")
+            .text(function(d) {return d[1];})
+            .attr('x', function(d) { return xscale(d[0]); })
+            .attr('y', function(d) { return h-yscale(d[1]); })
+            .attr("text-anchor","middle") // horizontally
+            .attr("dominant-baseline","middle") //vertically
+            .attr("font-size", 8)
+            .attr("fill","white")
+
+            // -------read a csv file and load into a var.--------
+            //read and parse data at the same time
+            var data_food;
+            d3.csv("food.csv", function(d) {
+                return {
+                    Food: d.Food,
+                    Deliciousness: parseFloat(d.Deliciousness)
+                }
+             }).then(function(d) { data_food=d; })
+
+
+            // --------<<<<<<<IMPOTANT NOTE>>>>>>>>>--------//
+            // all the funcs referencing the read/parsed data
+            // should be referenced within the .csv() callback func.
+            
+            var w=1000;
+            var h=500;
+            var wpad=40;
+            var hpad=10;
+            var dataset, xscale, yscale;
+            // covert string to DateTime object
+            var parsetime=d3.timeParse("%m/%d/%y")
+            // format a DateTime object
+            var formattime=d3.timeFormat("%b %d")
+            
+            d3.csv("time_scale_data.csv", function(d){
+                return{
+                    Date: parsetime(d.Date),
+                    Amount: parseInt(d.Amount)}
+                }).then(function (d) {
+                    dataset=d;
+                    
+                    // scale time
+                    xscale= d3.scaleTime()
+                        .domain([
+                            d3.min(dataset, function(e) { return e.Date; }),
+                            d3.max(dataset, function(e) { return e.Date; })])
+                        .rangeRound([wpad, w - wpad])
+                    yscale= d3.scaleTime()
+                        .domain([
+                            d3.min(dataset, function(e) { return e.Amount; }),
+                            d3.max(dataset, function(e) { return e.Amount; })])
+                            // reverse the order e.g from [0,100] to [100,0] to
+                            // reverse the coordinats of y axis ( no need to do it 
+                            // in the svg anymore)  
+                            .rangeRound([h-hpad, hpad])
+
+                    //visualize points
+                    var svg=d3.select("body").append("svg").attr("width",w).attr("height",h)
+                    var circles=svg.selectAll("circle").data(dataset).enter().append("circle")
+                    circles 
+                        .attr('cx', function(d) { return xscale(d.Date); })
+                        .attr('cy', function(d) { return yscale(d.Amount); })
+                        .attr('r', 2)
+                        .style('fill', 'black')
+
+                    // visualize text
+                    var texts=svg.selectAll("text").data(d).enter().append("text")
+                    texts.text(function(d) {return formattime(d.Date)  })
+                        .attr('x', function(d) { return xscale(d.Date); })
+                        .attr('y', function(d) { return yscale(d.Amount); })
+                        .style('fill', 'red')
+
+                    //generate axes
+                    var xaxis=d3.axisBottom(xscale)
+                    // "g" elements themselves are invisible so help to group 
+                    // and transform other elements that they contain
+                    svg.append("g").call(xaxis)
+                });
+
+            // revising the scatter plot labels
+            var w=1000;
+            var h=500;
+            var wpad=45;
+            var hpad=35;
+            var dataset, xscale, yscale;
+            // covert string to DateTime object
+            var parsetime=d3.timeParse("%m/%d/%y")
+            // format a DateTime object
+            var formattime=d3.timeFormat("%b %d")
+            
+            d3.csv("time_scale_data.csv", function(d){
+                return{
+                    Date: parsetime(d.Date),
+                    Amount: parseInt(d.Amount)}
+                }).then(function (d) {
+                    dataset=d;
+                    // dataset.push({Date:parsetime("10/02/21"), Amount: 150}); // test scalability 
+                    // scale time
+                    xscale= d3.scaleTime()
+                        .domain([
+                            d3.min(dataset, function(e) { return e.Date; }),
+                            d3.max(dataset, function(e) { return e.Date; })])
+                        .rangeRound([wpad, w - wpad])
+                    yscale= d3.scaleLinear()
+                        .domain([
+                            d3.min(dataset, function(e) { return e.Amount; }),
+                            d3.max(dataset, function(e) { return e.Amount; })])
+                            // reverse the order e.g from [0,100] to [100,0] to
+                            // reverse the coordinats of y axis ( no need to do it 
+                            // in the svg anymore)  
+                            .rangeRound([h-hpad, hpad])
+
+                    //visualize points
+                    var svg=d3.select("body").append("svg").attr("width",w).attr("height",h)
+                    var circles=svg.selectAll("circle").data(dataset).enter().append("circle")
+                    circles 
+                        .attr('cx', function(d) { return xscale(d.Date); })
+                        .attr('cy', function(d) { return yscale(d.Amount); })
+                        .attr('r', 2)
+                        .style('fill', 'black')
+
+                    // visualize text
+                    var texts=svg.selectAll("text").data(d).enter().append("text")
+                    texts.text(function(d) {return formattime(d.Date)+','+d.Amount  })
+                        .attr('x', function(d) { return xscale(d.Date); })
+                        .attr('y', function(d) { return yscale(d.Amount); })
+                        .style('fill', 'red')
+
+                    // generate axes
+                    // name of the axis is based of their tick direction
+                    var xaxis= d3.axisBottom(xscale)
+                    var yaxis= d3.axisLeft(yscale)
+                    // "g" elements themselves are invisible so help to group 
+                    // and transform other elements that they contain
+                    // it's recommended to name axes (add class) for easier referencing
+                    svg.append("g").attr("class", "axis")
+                    // move the xaxis to the bottom
+                    // "translate(x,y)" x & y represent the amount of 
+                    // horizontal & vertical movement 
+                    .attr("transform", `translate(0,${h-(hpad/1.5)})`)
+                    .call(xaxis)
+                    svg.append("g").attr("class", "axis")
+                    // move the yaxis to the edge of pading
+                    .attr("transform", `translate(${wpad/1.5},0)`)
+                    .call(yaxis)
+                });
+
+                // ---------------scatter plot Final touch-------------------
+                // revising the scatter plot labels
+            var w=1000;
+            var h=500;
+            var wpad=55;
+            var hpad=35;
+            var dataset, xscale, yscale; rscale
+            // covert string to DateTime object
+            var parsetime=d3.timeParse("%m/%d/%y")
+            // format a DateTime object
+            var formattime=d3.timeFormat("%b %d")
+            // used to format y axis tick # to float with one decimal point
+            var formattick=d3.format(".1f")
+            
+            d3.csv("time_scale_data.csv", function(d){
+                return{
+                    Date: parsetime(d.Date),
+                    Amount: parseInt(d.Amount)}
+                }).then(function (d) {
+                    dataset=d;
+                    // dataset.push({Date:parsetime("10/02/21"), Amount: 150}); // test scalability 
+                    // scale time
+                    xscale= d3.scaleTime()
+                        .domain([
+                            d3.min(dataset, function(e) { return e.Date; }),
+                            d3.max(dataset, function(e) { return e.Date; })])
+                        .rangeRound([wpad, w - wpad])
+                    yscale= d3.scaleLinear()
+                        .domain([
+                            d3.min(dataset, function(e) { return e.Amount; }),
+                            d3.max(dataset, function(e) { return e.Amount; })])
+                            // reverse the order e.g from [0,100] to [100,0] to
+                            // reverse the coordinats of y axis ( no need to do it 
+                            // in the svg anymore)  
+                        .rangeRound([h-hpad, hpad])
+                    rscale=d3.scaleSqrt()
+                        .domain([
+                            d3.min(dataset, function(e) { return e.Amount; }),
+                            d3.max(dataset, function(e) { return e.Amount; })]).nice()
+                        .rangeRound([2,10])
+
+                    //generate guide line
+                    var svg=d3.select("body").append("svg").attr("width",w).attr("height",h)
+                    svg.selectAll("line").data(dataset).enter().append("line")
+                    .attr("x1", function(d) { return xscale(d.Date); })
+                    .attr("y1", function(d) { return h-(hpad/1.5); }) // based on x axis transformation setting
+                    .attr("x2", function(d) { return xscale(d.Date); })
+                    .attr("y2", function(d) { return yscale(d.Amount); })
+                    .attr("stroke", "#ddd")
+                    .attr("stroke-width", 1)
+
+                    //visualize points last to come in front
+                    var circles=svg.selectAll("circle").data(dataset).enter().append("circle")
+                    circles 
+                        .attr('cx', function(d) { return xscale(d.Date); })
+                        .attr('cy', function(d) { return yscale(d.Amount); })
+                        .attr('r', function(d) { return rscale(d.Amount); })
+                        .style('fill', 'black')
+
+                    // generate axes
+                    // name of the axis func is based of their tick direction
+                    var xaxis= d3.axisBottom(xscale)
+                    var yaxis= d3.axisLeft(yscale).tickFormat(formattick)
+                    // "g" elements themselves are invisible so help to group 
+                    // and transform other elements that they contain
+                    // it's recommended to name axes (add class) for easier referencing
+                    svg.append("g").attr("class", "axis")
+                    // move the xaxis to the bottom
+                    // "translate(x,y)" x & y represent the amount of 
+                    // horizontal & vertical movement 
+                    .attr("transform", `translate(0,${h-(hpad/1.5)})`)
+                    .call(xaxis)
+                    svg.append("g").attr("class", "axis")
+                    // move the yaxis to the edge of pading
+                    .attr("transform", `translate(${wpad/1.5},0)`)
+                    .call(yaxis)
+                });
+
+
+            
+
+
+            
+            
+            
+            
+                
+          
+
+
+            
+        
+            
+            
+            
+
+
+
+            
+            
+
+
+
+
+
+
+
+            
+
+        </script>
+        
+    </body>
+</html>
